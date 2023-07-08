@@ -1,18 +1,20 @@
 
-const userTypeModels = require("../models/usertype.models");
+const dataModel = require("../models/holiday_types.models");
 
 
 
-module.exports.createUserType=async (req,res,next)=>{
+module.exports.create=async (req,res,next)=>{
 const form = req.body;
+
 const data = {
-    user_type_name:form.user_type_name,
+    
+    holiday_types_name:form.holiday_types_name,
     created_date:new Date()
 
 
 }
 
-userTypeModels.create(data,err=>{
+dataModel.create(data,err=>{
 
     if(!err){
         console.log("Save");
@@ -36,8 +38,8 @@ userTypeModels.create(data,err=>{
 }
 
 
-module.exports.readUserType=async (req,res,next)=>{
-    userTypeModels.find().exec((err,data)=>{
+module.exports.read=async (req,res,next)=>{
+    dataModel.find().exec((err,data)=>{
     if(!err){
 
         res.json({
@@ -58,15 +60,15 @@ module.exports.readUserType=async (req,res,next)=>{
         
     }
 
-    module.exports.updateUsertype=async (req,res,next)=>{
+    module.exports.update=async (req,res,next)=>{
         const form = req.body;
         const data = {
-            user_type_name:form.user_type_name,
+            holiday_types_name:form.holiday_types_name,
             updated_date:new Date()
 
         }        
         console.log(form);
-        userTypeModels.findByIdAndUpdate(form._id,data,{useFindAndModify:false}).exec((err,data)=>{
+        dataModel.findByIdAndUpdate(form._id,data,{useFindAndModify:false}).exec((err,data)=>{
 
             if(!err){
         console.log("Updatwe Sucess  ");
@@ -95,12 +97,12 @@ module.exports.readUserType=async (req,res,next)=>{
 
 
     
-    module.exports.deleteUserType=async (req,res,next)=>{
+    module.exports.delete=async (req,res,next)=>{
 
         const form = req.body; 
    
         
-        userTypeModels.findByIdAndDelete(form._id,{useFindAndModify:false}).exec((err)=>{
+        dataModel.findByIdAndDelete(form._id,{useFindAndModify:false}).exec((err)=>{
 
             if(!err){
         console.log("Delete Sucess  ");

@@ -4,50 +4,46 @@ const maxAge=60000;
 const bcrypt = require('bcryptjs');
 
 const createToken=(id)=>{
-    return jwt.sign({id},process.env.JWT_SECRET,{expiresIn:maxAge})
+    return jwt.sign({id},process.env.JWT_SECRET,{expiresIn:maxAge,})
     };
     
 
     module.exports.createUsers=async (req,res,next)=>{
         
             const form =req.body;
+            
 const data1={
     email:form.email,
     password:form.password,
 user_online:false,
 user_types_id:form.user_types_id,
+created_date:new Date()
 }
+     await userModels.create(data1,err=>{
 
-const result =  userModels.find({email:data1.email});
+        if(!err){
 
- if(result){
+            
+            console.log("Save");
+            res.json({
+                status:true,
+                message:"Saved"
 
-    res.json({
-        status:false, 
-        message:"Email have been ! "
-
-})
-
- }else{
+            })
+        }else{
+            console.log("error ");
     
-     const data = await userModels.create(data1)
+            res.json({
+                status:false,
+        
+                message:"Email have been!"
 
-            const token =createToken(data._id);
-            res.cookie("id",token,{
-                withCredent:true,
-                httpOnly:false,
-                maxAge:60000,
-            
-            }
-            );
-            
-        console.log("create  user");
-        res.json({
-            status:true, 
-            message:"selete all data ",
-        data:token
+    
+            })
+        }
     })
- }
+
+        
 
 
            
@@ -66,9 +62,9 @@ const result =  userModels.find({email:data1.email});
                   from: "user_types",
                   localField: "user_types_id",
                   foreignField: "_id",
-                  as: "user_type"
+                  as: "user_type_name"
                 }
-           }
+           },
         ]).exec((err,data)=>{
     
         if(!err){
@@ -97,7 +93,7 @@ module.exports.readUsers=async (req,res,next)=>{
 
     if(!err){
 
-        console.log("select ",data);
+    
         res.json({
             status:true, 
             message:"selete all data ",
@@ -106,7 +102,7 @@ module.exports.readUsers=async (req,res,next)=>{
     }else{
 
 
-        console.log("error");
+    
         res.json({
             status:false,
         message:err
@@ -150,7 +146,8 @@ password = await bcrypt.hash(form.password, salt);
 const data={
     email:form.email,
     password:password,
-    use_types_id:form.user_types_id
+    use_types_id:form.user_types_id,
+    updated_date:new Date()
 }
         userModels.findByIdAndUpdate(form._id,data,{useFindAndModify:false}).exec((err,data)=>{
 
@@ -216,9 +213,10 @@ const data={
 
         const form = req.body; 
         const email=form.email;
-        const user = await userModels.findOne({email});
+        const user = await userModels.findOneAndUpdate({email}, { user_online: true });
         
     if(user){
+
 const auth = await bcrypt.compare(form.password,user.password);   
 
 console.log("login have user")
@@ -239,12 +237,16 @@ res.cookie("id",token,{
 }
 );
 
+
+
+
 res.json({
  status:true,
                 message:"login Succecss  !",
                 token:token
-                
                 })
+
+
       
 }else{
 
@@ -269,30 +271,27 @@ return
 
 
     }
-    module.exports.checkToken = async (req,res,next)=> {
 
+
+    module.exports.checkToken = async (req,res,next)=> {
         if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
-        
+
             const token = req.headers.authorization.split(' ')[1];
+
             const decoded = jwt.verify(token,process.env.JWT_SECRET);
-        
+
             const user = await userModels.findById(decoded.id);
-        
-        
+
             if(user)
-        
             return res.status(200).json({
             status:true,
             data:user
         });
         
         
-        
         }  else {
-        
+
         return res.status(401).json({status:false,message:"Token is not "})
-        
-        
         }
         
         }

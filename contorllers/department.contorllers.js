@@ -1,18 +1,19 @@
 
-const userTypeModels = require("../models/usertype.models");
+const Department = require("../models/department.models");
 
 
 
-module.exports.createUserType=async (req,res,next)=>{
+module.exports.create=async (req,res,next)=>{
 const form = req.body;
 const data = {
-    user_type_name:form.user_type_name,
+    department_name:form.department_name,
+    groups_id:form.groups_id,
     created_date:new Date()
 
 
 }
 
-userTypeModels.create(data,err=>{
+Department.create(data,err=>{
 
     if(!err){
         console.log("Save");
@@ -34,10 +35,20 @@ userTypeModels.create(data,err=>{
     }
 })
 }
+module.exports.read1=async (req,res,next)=>{
 
+    Department.aggregate([
+        {
+          $lookup:
+            {
+              from: "groups",
+              localField: "groups_id",
+              foreignField: "_id",
+              as: "groups_name"
+            }
+       },
+    ]).exec((err,data)=>{
 
-module.exports.readUserType=async (req,res,next)=>{
-    userTypeModels.find().exec((err,data)=>{
     if(!err){
 
         res.json({
@@ -58,15 +69,39 @@ module.exports.readUserType=async (req,res,next)=>{
         
     }
 
-    module.exports.updateUsertype=async (req,res,next)=>{
+module.exports.read=async (req,res,next)=>{
+    Department.find().exec((err,data)=>{
+    if(!err){
+
+        res.json({
+            status:true, 
+            message:"selete all data ",
+        data:data
+    })
+    }else{
+
+
+        console.log("error");
+        res.json({
+            status:false,
+        message:err
+    })
+    }
+  });
+        
+    }
+
+    module.exports.update=async (req,res,next)=>{
         const form = req.body;
         const data = {
-            user_type_name:form.user_type_name,
+            
+            department_name:form.department_name,
+            groups_id:form.groups_id,
             updated_date:new Date()
 
         }        
         console.log(form);
-        userTypeModels.findByIdAndUpdate(form._id,data,{useFindAndModify:false}).exec((err,data)=>{
+        Department.findByIdAndUpdate(form._id,data,{useFindAndModify:false}).exec((err,data)=>{
 
             if(!err){
         console.log("Updatwe Sucess  ");
@@ -95,12 +130,12 @@ module.exports.readUserType=async (req,res,next)=>{
 
 
     
-    module.exports.deleteUserType=async (req,res,next)=>{
+    module.exports.delete=async (req,res,next)=>{
 
         const form = req.body; 
    
         
-        userTypeModels.findByIdAndDelete(form._id,{useFindAndModify:false}).exec((err)=>{
+        Department.findByIdAndDelete(form._id,{useFindAndModify:false}).exec((err)=>{
 
             if(!err){
         console.log("Delete Sucess  ");
